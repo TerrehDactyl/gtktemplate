@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 
-/* need to make entry functions, file chooser functions, radio button functions, menu functions, 
+/* file chooser functions, menu functions
 */
 
 #define arraysize(x)  (sizeof(x) / sizeof((x)[0]))
@@ -24,7 +24,7 @@ GtkWidget *create_text_display(GtkWidget *display, gboolean i, int length, int w
 
 	if (i == TRUE)
 	{
-	gtk_text_view_set_editable (GTK_TEXT_VIEW(display),FALSE);
+		gtk_text_view_set_editable (GTK_TEXT_VIEW(display),FALSE);
 	}
 
 	gtk_widget_set_size_request(display, length, width); //sets the size of the display 
@@ -70,10 +70,10 @@ void create_entries(int entry_len, GtkWidget *entries[], GtkWidget *entrygrid)
 {
 	for(int i = 0; i < entry_len; i++)
 	{
-	entries[i]= gtk_entry_new();
-	gtk_grid_attach(GTK_GRID(entrygrid), entries[i], 0, i, 1, 1); //sets the defaults for creating each table button
+		entries[i]= gtk_entry_new();
+		gtk_grid_attach(GTK_GRID(entrygrid), entries[i], 0, i, 1, 1); //sets the defaults for creating each table button
 	}
-	set_spacing(entrygrid, 4, 4);
+set_spacing(entrygrid, 4, 4);
 }
 
 GtkComboBox *create_combobox(gchar *combo_labels[], size_t combo_size, void *callback) 
@@ -98,10 +98,10 @@ GtkWidget *createlabels(gchar *labeltext[], size_t arraylen)
 		for(int j = 0; j<1; j++)
 		{	
 			GtkWidget *label = gtk_label_new(labeltext[i]);
-			gtk_grid_attach(GTK_GRID(grid), label, j, i, 1, 1); //sets the defaults for creating each table button
-		}
+		gtk_grid_attach(GTK_GRID(grid), label, j, i, 1, 1); //sets the defaults for creating each table button
 	}
-	return grid;
+}
+return grid;
 }
 
 GtkWidget *createsinglesizegrid(gchar *labels[], void *callback[], int rows, int columns)  
@@ -119,7 +119,32 @@ GtkWidget *createsinglesizegrid(gchar *labels[], void *callback[], int rows, int
 		gtk_widget_set_size_request(button, 70, 30); //sets the size of the buttons
 		pos++; //changes the position 
 		}
-		set_spacing(grid, 4, 4);
+	set_spacing(grid, 4, 4);
+	}
+return grid;
+}
+
+GtkWidget *createtwosizegrid(gchar *labels[], void  *callback[], int rows, int columns,  int normwidth, int normlen, int specwidth, int speclen, int range)
+{
+	GtkWidget *grid = gtk_grid_new();
+	int pos = 0;
+	for (int i=0; i < rows ; i++) //for loop for the rows
+	{
+		for (int j=0; j < columns; j++) //for loop for the columns
+		{ 
+		GtkWidget *button = gtk_button_new_with_label(labels[pos]); //sets each button label to the respective button 
+		button_connect_callback(button, callback[pos]); //attaches the button to the respective callback
+		gtk_grid_attach(GTK_GRID(grid), button, j, i, 1, 1); //sets the defaults for creating each table button
+		if (pos <= range)
+		{
+			gtk_widget_set_size_request(button, specwidth, speclen); //sets the size of the buttons
+		}
+		else 
+		{
+			gtk_widget_set_size_request(button, normwidth, normlen); //sets the size of the buttons
+		}
+		pos++;
+		}
 	}
 	return grid;
 }
@@ -137,7 +162,7 @@ GtkWidget *create_checkbox(GtkWidget *window, const gchar *label, gboolean statu
 	GtkWidget *checkbutton = gtk_check_button_new_with_label (label);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), status);
 	g_signal_connect (GTK_TOGGLE_BUTTON (checkbutton), "toggled", G_CALLBACK (callback), window);
-	//gtk_container_add (GTK_CONTAINER (box), checkbutton);
+//gtk_container_add (GTK_CONTAINER (box), checkbutton);
 	return checkbutton;
 }
 
@@ -148,4 +173,40 @@ void add_context(const gchar *style, GtkWidget *widget) //should already be modu
 	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(Provider), "Styles.css", NULL);
 	gtk_style_context_add_class(context, style);
 	gtk_style_context_add_provider (context,GTK_STYLE_PROVIDER(Provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+}
+
+GtkWidget *createradiobuttons(gchar *radiolabels[], void *radiocallback[], const gchar *style, int arraysize)
+{
+	GtkWidget *grid = gtk_grid_new();
+	GtkWidget *rootbutton = gtk_radio_button_new_with_label(NULL, radiolabels[0]);
+	add_context(style, rootbutton);
+	button_connect_callback(rootbutton, radiocallback[0], NULL);
+gtk_grid_attach(GTK_GRID(grid), rootbutton, 0, 0, 1, 1); //sets the defaults for creating each table button
+GtkWidget *labels;
+for (int i = 1; i<arraysize; i++)
+{
+	labels = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rootbutton), radiolabels[i]);
+gtk_grid_attach(GTK_GRID(grid), labels, i, 0, 1, 1); //sets the defaults for creating each table button
+gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(labels), FALSE);
+add_context(style, labels);
+button_connect_callback(labels, radiocallback[i], NULL);
+}
+return grid;
+}
+
+void createmenu(GtkWidget *root_menu, const gchar *style[], gchar *menu_array[], int arraylen, void *callback[])
+{
+	GtkWidget *menu;
+	GtkWidget *menu_items;
+	char buf[128];
+	menu = gtk_menu_new();
+	add_context(style[5], menu);
+	for(int j = 0; j<arraylen; j++)
+	{
+		sprintf (buf, "%s", menu_array[j]);
+		menu_items = gtk_menu_item_new_with_label(buf);
+		menu_callback(menu_items, callback[j]);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_items);
+		gtk_menu_item_set_submenu(GTK_MENU_ITEM(root_menu), menu);
+	}
 }
