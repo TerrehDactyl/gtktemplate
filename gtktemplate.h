@@ -133,7 +133,7 @@ GtkWidget *createtwosizegrid(gchar *labels[], void  *callback[], int rows, int c
 		for (int j=0; j < columns; j++) //for loop for the columns
 		{ 
 		GtkWidget *button = gtk_button_new_with_label(labels[pos]); //sets each button label to the respective button 
-		button_connect_callback(button, callback[pos]); //attaches the button to the respective callback
+		button_connect_callback(button, callback[pos], NULL); //attaches the button to the respective callback
 		gtk_grid_attach(GTK_GRID(grid), button, j, i, 1, 1); //sets the defaults for creating each table button
 		if (pos <= range)
 		{
@@ -194,7 +194,7 @@ button_connect_callback(labels, radiocallback[i], NULL);
 return grid;
 }
 
-void createmenu(GtkWidget *root_menu, const gchar *style[], gchar *menu_array[], int arraylen, void *callback[])
+GtkWidget *createmenu(GtkWidget *root_menu, const gchar *style[], gchar *menu_array[], int arraylen, void *callback[])
 {
 	GtkWidget *menu;
 	GtkWidget *menu_items;
@@ -205,8 +205,9 @@ void createmenu(GtkWidget *root_menu, const gchar *style[], gchar *menu_array[],
 	{
 		sprintf (buf, "%s", menu_array[j]);
 		menu_items = gtk_menu_item_new_with_label(buf);
-		menu_callback(menu_items, callback[j]);
+		button_connect_callback(menu_items, callback[j], NULL);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_items);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(root_menu), menu);
 	}
+	return menu;
 }
