@@ -4,7 +4,9 @@
 */
 typedef struct variables
 {
-	char *pointer[4];
+	char *pointer[5];
+	int current;
+	int max;
 }location;
 
 #define arraysize(x)  (sizeof(x) / sizeof((x)[0]))
@@ -18,6 +20,7 @@ void show_and_destroy( GtkWidget *window)
 
 void button_connect_callback(GtkWidget *button, gchar *action, void *button_callback, location *data) 
 {
+	//g_print("%s from button callback", data->pointer[data->current]);
 	g_signal_connect(button, action, G_CALLBACK(button_callback), data);
 }
 
@@ -112,7 +115,7 @@ GtkWidget *createsinglesizegrid(gchar *labels[], void *callback[], location *dat
 {
 	GtkWidget *grid = gtk_grid_new(); 
 	int pos = 0;
-g_print("%s from grid function \n", data->pointer[4]);
+g_print("%s from grid function \n", data->pointer[0]);
 	for (int i=0; i < rows; i++) //for loop for the rows
 	{
 		for (int j=0; j < columns; j++) //for loop for the columns
@@ -223,15 +226,18 @@ gint res;
 GtkWindow *new_window;
 new_window = (GtkWindow *)gtk_window_new(GTK_WINDOW_POPUP);
 GtkWidget *filechoosers = gtk_file_chooser_dialog_new ("Open File", new_window, action, ("_Cancel"), GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT, NULL);
-
 res = gtk_dialog_run (GTK_DIALOG (filechoosers));
+if(data->current == data->max)
+{
+	data->current = 0;
+}
 if (res == GTK_RESPONSE_ACCEPT)
   {
    GtkFileChooser *chooser = GTK_FILE_CHOOSER (filechoosers);
 
-   data->pointer[4] = gtk_file_chooser_get_filename (chooser);
-   
-   g_print("%s\n", data->pointer[4]);
+   data->pointer[data->current] = gtk_file_chooser_get_filename (chooser);
+   data->current++;
+   g_print("%s\n", data->pointer[data->current]);
   }
 gtk_widget_destroy (filechoosers);
 }
