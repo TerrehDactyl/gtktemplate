@@ -20,7 +20,6 @@ void show_and_destroy( GtkWidget *window)
 
 void button_connect_callback(GtkWidget *button, gchar *action, void *button_callback, location *data) 
 {
-	//g_print("%s from button callback", data->pointer[data->current]);
 	g_signal_connect(button, action, G_CALLBACK(button_callback), data);
 }
 
@@ -115,7 +114,6 @@ GtkWidget *createsinglesizegrid(gchar *labels[], void *callback[], location *dat
 {
 	GtkWidget *grid = gtk_grid_new(); 
 	int pos = 0;
-g_print("%s from grid function \n", data->pointer[0]);
 	for (int i=0; i < rows; i++) //for loop for the rows
 	{
 		for (int j=0; j < columns; j++) //for loop for the columns
@@ -237,7 +235,13 @@ if (res == GTK_RESPONSE_ACCEPT)
 
    data->pointer[data->current] = gtk_file_chooser_get_filename (chooser);
    data->current++;
-   g_print("%s\n", data->pointer[data->current]);
   }
 gtk_widget_destroy (filechoosers);
+}
+
+GtkWidget *create_progress_bar(void *callback)
+{
+	GtkWidget *progress_bar = gtk_progress_bar_new ();
+	g_timeout_add (500, callback, GTK_PROGRESS_BAR (progress_bar));
+	return progress_bar;
 }
