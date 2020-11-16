@@ -58,7 +58,19 @@ GtkWidget *createwindow(char * title, GtkWindowPosition position)
 	GtkWidget *widget = gtk_window_new(GTK_WINDOW_TOPLEVEL); //creates toplevel window
 	gtk_window_set_title(GTK_WINDOW(widget), title); //sets a window title 
 	gtk_window_set_position(GTK_WINDOW(widget), position); //opens the window in the center of the screen
-	gtk_container_set_border_width(GTK_CONTAINER(widget), 5); //sets the border size of the window
+	return widget;
+}
+
+GtkWidget *create_custom_window(char * title, GtkWindowType type, GtkWindowPosition position, int width, int height) 
+{
+	GtkWidget *widget = gtk_window_new(type); //creates toplevel window
+	gtk_window_set_title(GTK_WINDOW(widget), title); //sets a window title 
+	gtk_window_set_position(GTK_WINDOW(widget), position); //opens the window in the center of the screen
+
+	if(height && width)
+	{
+		gtk_window_set_default_size ((GtkWindow *)widget, width, height);
+	}
 	return widget;
 }
 
