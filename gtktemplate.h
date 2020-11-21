@@ -53,24 +53,42 @@ void set_spacing(GtkWidget *widget, int colspace, int rowspace)
 	gtk_grid_set_row_spacing(GTK_GRID(widget), rowspace);
 }
 
-GtkWidget *createwindow(char * title, GtkWindowPosition position) 
+GdkPixbuf *createpixbuf(const gchar *filename)
+{
+	GdkPixbuf *pixbuf;
+    GError *error = NULL;
+    pixbuf = gdk_pixbuf_new_from_file(filename, &error);
+	if(!pixbuf) 
+   {
+      fprintf(stderr, "%s\n", error->message);
+      g_error_free(error);
+   }
+   return pixbuf;
+}
+
+GtkWidget *createwindow(char * title, GtkWindowPosition position, const gchar *filename) 
 {
 	GtkWidget *widget = gtk_window_new(GTK_WINDOW_TOPLEVEL); //creates toplevel window
 	gtk_window_set_title(GTK_WINDOW(widget), title); //sets a window title 
 	gtk_window_set_position(GTK_WINDOW(widget), position); //opens the window in the center of the screen
+    gtk_window_set_icon(GTK_WINDOW(widget), createpixbuf(filename));
+
 	return widget;
 }
 
-GtkWidget *create_custom_window(char * title, GtkWindowType type, GtkWindowPosition position, int width, int height) 
+
+GtkWidget *create_custom_window(char * title, GtkWindowType type, GtkWindowPosition position, const gchar *filename, int width, int height) 
 {
 	GtkWidget *widget = gtk_window_new(type); //creates toplevel window
 	gtk_window_set_title(GTK_WINDOW(widget), title); //sets a window title 
 	gtk_window_set_position(GTK_WINDOW(widget), position); //opens the window in the center of the screen
-
+	gtk_window_set_icon(GTK_WINDOW(widget), createpixbuf(filename));
+	
 	if(height && width)
 	{
 		gtk_window_set_default_size ((GtkWindow *)widget, width, height);
 	}
+
 	return widget;
 }
 
@@ -256,4 +274,24 @@ GtkWidget *create_progress_bar(void *callback)
 	GtkWidget *progress_bar = gtk_progress_bar_new ();
 	g_timeout_add (500, callback, GTK_PROGRESS_BAR (progress_bar));
 	return progress_bar;
+}
+
+GtkWidget *create_drawing_area(void *callback, gpointer image, int height, int width)
+{
+	GtkWidget *widget = gtk_drawing_area_new();
+	if(height && width)
+	{
+		gtk_widget_set_size_request(widget, width, height); //sets the size of the buttons
+	}
+	g_signal_connect (G_OBJECT (widget), "draw", G_CALLBACK (callback), image);
+
+	return widget;
+}
+
+void draw_image(GtkWidget *widget, cairo_t *cr, gpointer user_data)
+{
+	const char *data = (const char *) user_data;
+	GdkPixbuf *pixbuf = createpixbuf(data); 
+	gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+	cairo_paint (cr);
 }
