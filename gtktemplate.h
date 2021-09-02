@@ -1,7 +1,30 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-/* file chooser functions, menu functions
-*/
+#include <cairo.h>
+/* file chooser functions, menu functions*/
+#define YELLOW 848749
+#define BLUE 31261
+#define GREEN 159890
+#define PURPLE 831441
+#define RED 6580
+#define ORANGE 824241
+#define PINK 32907
+#define WHITE 168806
+#define BLACK 155902
+#define TEAL 33243
+#define BROWN 157105
+#define GREY 31976
+#define AQUA 31257
+#define INDIGO 803251
+#define LAVENDER 20167494
+#define FOREST 796216
+#define LIME 32396
+#define WINE 33776
+#define ZOOM_X  100.0
+#define ZOOM_Y  100.0
+
+gboolean transpose = FALSE;
+
 typedef struct variables
 {
 	char *pointer[5];
@@ -72,10 +95,18 @@ GtkWidget *createwindow(char * title, GtkWindowPosition position, const gchar *f
 	gtk_window_set_title(GTK_WINDOW(widget), title); //sets a window title 
 	gtk_window_set_position(GTK_WINDOW(widget), position); //opens the window in the center of the screen
     gtk_window_set_icon(GTK_WINDOW(widget), createpixbuf(filename));
-
 	return widget;
 }
 
+GtkWidget *create_sized_window(char * title, GtkWindowPosition position, int HEIGHT, int WIDTH, const gchar *filename) 
+{
+	GtkWidget *widget = gtk_window_new(GTK_WINDOW_TOPLEVEL); //creates toplevel window
+	gtk_window_set_title(GTK_WINDOW(widget), title); //sets a window title 
+	gtk_window_set_position(GTK_WINDOW(widget), position); //opens the window in the center of the screen
+    gtk_window_set_icon(GTK_WINDOW(widget), createpixbuf(filename));
+    gtk_window_set_default_size (GTK_WINDOW (widget), WIDTH, HEIGHT);
+	return widget;
+}
 
 GtkWidget *create_custom_window(char * title, GtkWindowType type, GtkWindowPosition position, const gchar *filename, int width, int height) 
 {
@@ -216,16 +247,16 @@ GtkWidget *createradiobuttons(gchar *radiolabels[], void *radiocallback[], int a
 	GtkWidget *grid = gtk_grid_new();
 	GtkWidget *rootbutton = gtk_radio_button_new_with_label(NULL, radiolabels[0]);
 	button_connect_callback(rootbutton,"clicked", radiocallback[0], NULL);
-gtk_grid_attach(GTK_GRID(grid), rootbutton, 0, 0, 1, 1); //sets the defaults for creating each table button
-GtkWidget *labels;
-for (int i = 1; i<arraysize; i++)
-{
-	labels = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rootbutton), radiolabels[i]);
-gtk_grid_attach(GTK_GRID(grid), labels, i, 0, 1, 1); //sets the defaults for creating each table button
-gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(labels), FALSE);
-button_connect_callback(labels, "clicked", radiocallback[i], NULL);
-}
-return grid;
+	gtk_grid_attach(GTK_GRID(grid), rootbutton, 0, 0, 1, 1); //sets the defaults for creating each table button
+	GtkWidget *labels;
+	for (int i = 1; i<arraysize; i++)
+	{
+		labels = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rootbutton), radiolabels[i]);
+		gtk_grid_attach(GTK_GRID(grid), labels, i, 0, 1, 1); //sets the defaults for creating each table button
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(labels), FALSE);
+		button_connect_callback(labels, "clicked", radiocallback[i], NULL);
+	}
+	return grid;
 }
 
 GtkWidget *createmenu(gchar *headers, gchar *menu_array[], int arraylen, void *callback[])
@@ -249,24 +280,24 @@ GtkWidget *createmenu(gchar *headers, gchar *menu_array[], int arraylen, void *c
 
 void createfilechoosers(GtkButton *button, location* data)
 {
-GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-gint res;
-GtkWindow *new_window;
-new_window = (GtkWindow *)gtk_window_new(GTK_WINDOW_POPUP);
-GtkWidget *filechoosers = gtk_file_chooser_dialog_new ("Open File", new_window, action, ("_Cancel"), GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT, NULL);
-res = gtk_dialog_run (GTK_DIALOG (filechoosers));
-if(data->current == data->max)
-{
-	data->current = 0;
-}
-if (res == GTK_RESPONSE_ACCEPT)
-  {
-   GtkFileChooser *chooser = GTK_FILE_CHOOSER (filechoosers);
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+	gint res;
+	GtkWindow *new_window;
+	new_window = (GtkWindow *)gtk_window_new(GTK_WINDOW_POPUP);
+	GtkWidget *filechoosers = gtk_file_chooser_dialog_new ("Open File", new_window, action, ("_Cancel"), GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+	res = gtk_dialog_run (GTK_DIALOG (filechoosers));
+	if(data->current == data->max)
+	{
+		data->current = 0;
+	}
+	if (res == GTK_RESPONSE_ACCEPT)
+	  {
+	   GtkFileChooser *chooser = GTK_FILE_CHOOSER (filechoosers);
 
-   data->pointer[data->current] = gtk_file_chooser_get_filename (chooser);
-   data->current++;
-  }
-gtk_widget_destroy (filechoosers);
+	   data->pointer[data->current] = gtk_file_chooser_get_filename (chooser);
+	   data->current++;
+	  }
+	gtk_widget_destroy (filechoosers);
 }
 
 GtkWidget *create_progress_bar(void *callback)
@@ -276,7 +307,65 @@ GtkWidget *create_progress_bar(void *callback)
 	return progress_bar;
 }
 
-GtkWidget *create_drawing_area(void *callback, gpointer image, int height, int width)
+const unsigned long hash(const char *str) 
+{
+    unsigned long hash = 25;  
+    int c;
+
+    while ((c = *str++))
+        hash = ((hash << 2) + hash) + c;
+    return hash;
+}
+
+void cairo_color(cairo_t *cr, char* color)
+{
+    float r=0, g=0, b=0;
+    switch(hash(color))
+    {
+    case YELLOW: r = 1, g = 1, b = 0;
+        break;
+    case BLUE: r = 0, g = 0, b = 1;
+        break;
+    case AQUA: r = 0, g = 1, b = 1;
+        break;
+    case INDIGO: r = 0, g = 0.11, b = 0.4;
+        break;
+    case FOREST: r = 0, g = 0.3, b = 0;
+        break;
+    case LIME: r = 0, g = 1, b = 0.2;
+        break;
+    case WINE: r = 0.2, g = 0, b = 0.2;
+        break;
+    case LAVENDER: r = 0.4, g = 0, b = 1;
+        break;
+    case GREEN: r = 0, g = 1, b = 0;
+        break;
+    case PURPLE: r = 0.5, g = 0, b = 1;
+        break;
+    case RED: r = 1, g = 0, b = 0;
+        break;
+    case ORANGE: r = 1, g = 0.5, b = 0;
+        break;
+    case PINK: r = 1, g = 0, b = 1;
+        break;
+    case WHITE: r = 1, g = 1, b = 1;
+        break;
+    case BLACK: r = 0, g = 0, b = 0;
+        break;
+    case TEAL: r = 0, g = 1, b = 0.5;
+        break;
+    case BROWN: r = 0.2, g = 0.1, b = 0.1;
+        break;
+    case GREY: r = 0.3, g = 0.3, b = 0.3;
+        break;
+    default:
+        printf("[ERROR] '%s' is not a valid color. Options are YELLOW, BLUE, GREEN, PURPLE, RED, ORANGE, PINK, WHITE, BLACK, TEAL, BROWN and GREY.\n", color);
+        break;
+    }
+    cairo_set_source_rgb (cr, r, g, b);
+}
+
+GtkWidget *create_image_area(void *callback, gpointer image, int height, int width)
 {
 	GtkWidget *widget = gtk_drawing_area_new();
 	if(height && width)
@@ -294,4 +383,71 @@ void draw_image(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 	GdkPixbuf *pixbuf = createpixbuf(data); 
 	gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
 	cairo_paint (cr);
+}
+
+void draw_quad_axis(cairo_t *cr, double max_x, double max_y, char *color)
+{   
+	cairo_color(cr, color); 
+    cairo_move_to (cr, -max_x, 0.0);
+    cairo_line_to (cr, max_x, 0.0);
+    cairo_move_to (cr, 0.0, -max_y);
+    cairo_line_to (cr, 0.0, max_y);
+    cairo_stroke (cr);
+    transpose = FALSE;
+}
+
+void draw_dual_axis(cairo_t *cr, double max_x, double max_y, char *color)
+{    
+	cairo_color(cr, color);
+    cairo_move_to (cr, max_x, -max_x);
+    cairo_line_to (cr, -max_x, -max_x);
+    cairo_move_to (cr, -max_y, max_y);
+    cairo_line_to (cr, -max_y, -max_y);
+    cairo_stroke (cr);
+    transpose = TRUE;
+}
+
+double *transpose_data(double arr[], size_t arr_size, double max)
+{
+	for(int i = 0; i < arr_size; i++)
+		arr[i] = -max + arr[i];
+	return arr;
+}
+
+void plot_cairo(cairo_t *cr, double xarr[], double yarr[], size_t arr_size, double max_x, double max_y, char *color)
+{
+	cairo_color(cr, color);
+	if(transpose == TRUE)
+	{
+	xarr = transpose_data(xarr, arr_size, max_x);
+	yarr = transpose_data(yarr, arr_size, max_y);
+	}
+
+	for(int i = 0; i < arr_size; i++)
+	    cairo_line_to(cr, xarr[i], yarr[i]);
+	cairo_stroke(cr);
+}
+
+GtkWidget *create_graph_area(void *callback)
+{
+    GtkWidget *widget = gtk_drawing_area_new();
+    g_signal_connect (G_OBJECT (widget), "draw", G_CALLBACK (callback), NULL);
+    return widget;
+}
+
+void create_gdk_window(GtkWidget *widget, cairo_t *cr, char *color)
+{
+    GdkRectangle da;
+    GdkWindow *window = gtk_widget_get_window(widget);
+    gdk_window_get_geometry (window, &da.x, &da.y, &da.width, &da.height); // Determine GtkDrawingArea dimensions
+    cairo_translate (cr, da.width / 2, da.height / 2);// Change the transformation matrix
+    cairo_scale (cr, ZOOM_X, -ZOOM_Y);
+    cairo_color(cr, color); // Draw on a black background 
+    cairo_paint (cr);
+}
+
+void cairo_set_pixels_and_width(cairo_t *cr, double dx, double dy)
+{
+	cairo_device_to_user_distance (cr, &dx, &dy); // Determine the data points to calculate (ie. those in the clipping zone
+    cairo_set_line_width (cr, dx);
 }
