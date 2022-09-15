@@ -133,14 +133,16 @@ GtkWidget *createnotebook(GtkWidget *window)
 	return notebook;
 }
 
-void create_entries(int entry_len, GtkWidget *entries[], GtkWidget *entrygrid) 
+GtkWidget *create_entries(int entry_len, GtkWidget *entries[]) 
 {
+	GtkWidget *entrygrid = gtk_grid_new();
 	for(int i = 0; i < entry_len; i++)
 	{
 		entries[i]= gtk_entry_new();
 		gtk_grid_attach(GTK_GRID(entrygrid), entries[i], 0, i, 1, 1); //sets the defaults for creating each table button
 	}
 set_spacing(entrygrid, 4, 4);
+return entrygrid;
 }
 
 GtkComboBox *create_combobox(gchar *combo_labels[], size_t combo_size, void *callback) 
