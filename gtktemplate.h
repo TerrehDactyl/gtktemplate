@@ -23,6 +23,7 @@
 #define ZOOM_X  100.0
 #define ZOOM_Y  100.0
 
+
 gboolean transpose = FALSE;
 
 typedef struct variables
@@ -133,16 +134,14 @@ GtkWidget *createnotebook(GtkWidget *window)
 	return notebook;
 }
 
-GtkWidget *create_entries(int entry_len, GtkWidget *entries[]) 
+void create_entries(int entry_len, GtkWidget *entries[], GtkWidget *entrygrid) 
 {
-	GtkWidget *entrygrid = gtk_grid_new();
 	for(int i = 0; i < entry_len; i++)
 	{
 		entries[i]= gtk_entry_new();
 		gtk_grid_attach(GTK_GRID(entrygrid), entries[i], 0, i, 1, 1); //sets the defaults for creating each table button
 	}
 set_spacing(entrygrid, 4, 4);
-return entrygrid;
 }
 
 GtkComboBox *create_combobox(gchar *combo_labels[], size_t combo_size, void *callback) 
@@ -361,7 +360,7 @@ void cairo_color(cairo_t *cr, char* color)
     case GREY: r = 0.3, g = 0.3, b = 0.3;
         break;
     default:
-        printf("[ERROR] '%s' is not a valid color. Options are YELLOW, BLUE, GREEN, PURPLE, RED, ORANGE, PINK, WHITE, BLACK, TEAL, BROWN and GREY.\n", color);
+        printf("[ERROR] '%s' is not a valid color. Options are YELLOW, BLUE, AQUA, INDIGO, FOREST, LIME, WINE, LAVENDER, GREEN, PURPLE, RED, ORANGE, PINK, WHITE, BLACK, TEAL, BROWN and GREY.\n", color);
         break;
     }
     cairo_set_source_rgb (cr, r, g, b);
