@@ -115,9 +115,7 @@ GtkWidget *create_custom_window(char * title, GtkWindowType type, GtkWindowPosit
 	gtk_window_set_icon(GTK_WINDOW(widget), create_pixbuf(filename));
 	
 	if(height && width)
-	{
 		gtk_window_set_default_size ((GtkWindow *)widget, width, height);
-	}
 	return widget;
 }
 
@@ -156,6 +154,24 @@ GtkComboBox *create_combobox(gchar *combo_labels[], size_t combo_size, void *cal
 	return widget;
 }
 
+// GtkComboBox *create_combobox(gchar *combo_labels[], size_t combo_sizes, void *callback) 
+// {
+// 	GtkComboBox *widget = GTK_COMBO_BOX(gtk_combo_box_text_new ());
+// 	size_t combo_size = 0;
+// 	while(*combo_labels[combo_size++])
+// 	{
+// 		g_print("%d\n", combo_size);
+// 	}
+// 	for (int i = 0; i < combo_size; i++)
+// 	{
+// 		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (widget), combo_labels[i]);
+// 	}
+// 	gtk_combo_box_set_active (GTK_COMBO_BOX (widget), 0);
+// 	g_signal_connect (widget,"changed",G_CALLBACK (callback),NULL);
+// 	return widget;
+// }
+
+
 GtkWidget *create_labels(gchar *label_text[], size_t array_len) 
 {
 	GtkWidget *grid = gtk_grid_new();
@@ -165,9 +181,9 @@ GtkWidget *create_labels(gchar *label_text[], size_t array_len)
 		for(int j = 0; j<1; j++)
 		{	
 			GtkWidget *label = gtk_label_new(label_text[i]);
-		gtk_grid_attach(GTK_GRID(grid), label, j, i, 1, 1); //sets the defaults for creating each table button
+			gtk_grid_attach(GTK_GRID(grid), label, j, i, 1, 1); //sets the defaults for creating each table button
+		}
 	}
-}
 return grid;
 }
 
@@ -202,13 +218,9 @@ GtkWidget *create_two_size_grid(gchar *labels[], void  *callback[], int rows, in
 		button_connect_callback(button, "clicked", callback[pos], NULL); //attaches the button to the respective callback
 		gtk_grid_attach(GTK_GRID(grid), button, j, i, 1, 1); //sets the defaults for creating each table button
 		if (pos <= range)
-		{
 			gtk_widget_set_size_request(button, spec_width, spec_len); //sets the size of the buttons
-		}
 		else 
-		{
 			gtk_widget_set_size_request(button, norm_width, norm_len); //sets the size of the buttons
-		}
 		pos++;
 		}
 		set_spacing(grid, 4, 4);
@@ -219,10 +231,20 @@ GtkWidget *create_two_size_grid(gchar *labels[], void  *callback[], int rows, in
 void get_entry_text(GtkWidget *widget[], const gchar *entries[], size_t entry_size) //need to work on this 
 {
 	for(int i = 0; i < entry_size; i++)
-	{
 		entries[i] = gtk_entry_get_text(GTK_ENTRY(widget[i]));
-	}
 }
+
+// const gchar *get_entry_text(GtkWidget *widget[]) //need to work on this 
+// {
+// 	size_t entry_size = arraysize(widget);
+// 	printf("%d", entry_size);
+// 	const gchar *entries[entry_size];
+// 	for(int i = 0; i < entry_size; i++)
+// 	{
+// 		entries[i] = gtk_entry_get_text(GTK_ENTRY(widget[i]));
+// 	}
+// 	return *entries;
+// }
 
 GtkWidget *create_checkbox(GtkWidget *window, const gchar *label, gboolean status, void *callback)
 {
@@ -287,9 +309,8 @@ void create_file_choosers(GtkButton *button, location* data)
 	GtkWidget *file_choosers = gtk_file_chooser_dialog_new ("Open File", new_window, action, ("_Cancel"), GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT, NULL);
 	res = gtk_dialog_run (GTK_DIALOG (file_choosers));
 	if(data->current == data->max)
-	{
 		data->current = 0;
-	}
+
 	if (res == GTK_RESPONSE_ACCEPT)
 	  {
 	   GtkFileChooser *chooser = GTK_FILE_CHOOSER (file_choosers);
@@ -368,9 +389,8 @@ GtkWidget *create_image_area(void *callback, gpointer image, int height, int wid
 {
 	GtkWidget *widget = gtk_drawing_area_new();
 	if(height && width)
-	{
 		gtk_widget_set_size_request(widget, width, height); //sets the size of the buttons
-	}
+	
 	g_signal_connect (G_OBJECT (widget), "draw", G_CALLBACK (callback), image);
 
 	return widget;
